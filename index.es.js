@@ -2,7 +2,7 @@
  * @Author: daycool
  * @Date:   2018-04-10 12:12:03
  * @Last Modified by: daycool
- * @Last Modified time: 2019-02-28 15:13:39
+ * @Last Modified time: 2019-02-28 18:37:23
  */
 
 const nunjucks = require('nunjucks')
@@ -349,6 +349,7 @@ function getServiceInfo (pageData, interData) {
     url: interData.url,
     reqData: interData.req,
     resData: interData.res,
+    reqDataData: JSON.stringify(hjsonStrToObj(interData.req)),
     resDataData: JSON.stringify(hjsonStrToObj(interData.res).data),
     method: interData.method,
     label: interData.label
