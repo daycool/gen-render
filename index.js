@@ -4,7 +4,7 @@
  * @Author: daycool
  * @Date:   2018-04-10 12:12:03
  * @Last Modified by: daycool
- * @Last Modified time: 2019-02-27 15:24:56
+ * @Last Modified time: 2019-02-28 15:13:39
  */
 
 const nunjucks = require('nunjucks');
@@ -27,11 +27,11 @@ nunjucks.configure({
     variableStart: '<$',
     variableEnd: '$>',
     commentStart: '<#',
-    commentEnd: '#>',
-  },
+    commentEnd: '#>'
+  }
 });
 
-async function outputPage(
+async function outputPage (
   pageData,
   appData,
   scaffoldData,
@@ -44,7 +44,7 @@ async function outputPage(
 
   if (!appPath) {
     console.log('appPath不存在');
-    return;
+    return
   }
   let pagePath = pageData.path;
   // let templateId = getTemplateId(pageData)
@@ -64,7 +64,7 @@ async function outputPage(
     interData: interData,
     service: service,
     templateData,
-    componentsData,
+    componentsData
   };
 
   // if(!pageId){
@@ -82,10 +82,10 @@ async function outputPage(
 
   let previewUrl = getPreviewurl(pagePath, scaffoldData);
 
-  return previewUrl;
+  return previewUrl
 }
 
-async function outputConfigFile(
+async function outputConfigFile (
   pageData,
   appData,
   scaffoldData,
@@ -96,7 +96,7 @@ async function outputConfigFile(
     pageData: pageData,
     appData: appData,
     scaffoldData: scaffoldData,
-    interData: interData,
+    interData: interData
   };
 
   const promises = scaffoldData.extra_template.map(async item => {
@@ -107,24 +107,24 @@ async function outputConfigFile(
   await Promise.all(promises);
 }
 
-function getExtraTemplateFile(extraTemplate, renderData) {
+function getExtraTemplateFile (extraTemplate, renderData) {
   // let renderExtraTemplate = renderCommonTempate();
   var name = nunjucks.renderString(extraTemplate.name, renderData);
   var extraTemplateFile = path.join(appPath, extraTemplate.dir, name);
-  return extraTemplateFile;
+  return extraTemplateFile
 }
-function getPreviewFile(path, scaffoldData) {
+function getPreviewFile (path, scaffoldData) {
   var dirname = appPath;
   var scaffoldDir = dirname + '/' + scaffoldData.name;
   var previewFile = appPath + scaffoldData.page_dir + path + '.js';
-  return previewFile;
+  return previewFile
 }
 
-function getPreviewurl(path, scaffoldData) {
-  return '/scaffold/' + scaffoldData.name + '/#' + path;
+function getPreviewurl (path, scaffoldData) {
+  return '/scaffold/' + scaffoldData.name + '/#' + path
 }
 
-function toTreeData(
+function toTreeData (
   templateHjson,
   reqHjson,
   resHjson,
@@ -137,41 +137,30 @@ function toTreeData(
   let data = {
     ...template,
     fieldName: 'template',
-    children: [],
+    children: []
   };
   const reqRootComponent = getRootData(reqHjson, componentsData);
   const resRootComponent = getRootData(resHjson, componentsData);
   data.children = [reqRootComponent, resRootComponent];
 
-  return data;
+  return data
 }
 
-function getRootData(hjson, componentsData) {
+function getRootData (hjson, componentsData) {
   // 根组件
   const rootComponentComments = hjson.getRootCommentJson();
   const component = getComponentData(rootComponentComments, componentsData);
   const rootComponent = {
     ...component,
     fieldName: 'rootComponent',
-    children: [],
+    children: []
   };
   const rootComponentChildren = rootComponent.children;
-  getData(hjson, hjson.obj, [], componentsData, rootComponentChildren);
-  return rootComponent;
+  getChildData(hjson, hjson.obj, [], componentsData, rootComponentChildren);
+  return rootComponent
 }
 
-function getData(hjson, value, paths, componentsData, parentChildren) {
-  // 根组件
-  // const rootComponentComments = hjson.getRootCommentJson()
-  // const component = getComponentData(rootComponentComments, componentsData)
-  // const rootComponent = {
-  //   ...component,
-  //   fieldName: 'rootComponent',
-  //   children: []
-  // }
-  // const rootComponentChildren = rootComponent.children
-  // templateChildren.push(rootComponent)
-
+function getChildData (hjson, value, paths, componentsData, parentChildren) {
   // 子孙组件
   // const value = hjson.getVar(paths)
   Object.keys(value).forEach(fieldName => {
@@ -184,15 +173,15 @@ function getData(hjson, value, paths, componentsData, parentChildren) {
       ...newComponent,
       ...fieldComments,
       fieldName: fieldName,
-      children,
+      children
     });
     if (typeof newValue === 'object') {
-      getData(hjson, newValue, newPaths, componentsData, children);
+      getChildData(hjson, newValue, newPaths, componentsData, children);
     }
   });
 }
 
-function getComponentData(comments, componentsData, uiType = 'ui') {
+function getComponentData (comments, componentsData, uiType = 'ui') {
   const ui = comments[uiType];
   if (ui) {
     const componentName = ui.__componentName;
@@ -208,16 +197,16 @@ function getComponentData(comments, componentsData, uiType = 'ui') {
         }
       });
     });
-    return component;
+    return component
   } else {
-    return {};
+    return {}
   }
 }
 
 /**
  * 页面预览可能没有页面id所以需要传pageData
  */
-async function renderTemplate(options) {
+async function renderTemplate (options) {
   // 修改content为tree 组件模式，有子组件render
   // let data = options.pageData.page_template[0].content
 
@@ -251,10 +240,10 @@ async function renderTemplate(options) {
     componentsData
   );
 
-  return outputTemplate;
+  return outputTemplate
 }
 
-function getServiceInfo(pageData, interData) {
+function getServiceInfo (pageData, interData) {
   // let tempalte = pageData.page_template[0]
 
   let service = {
@@ -264,171 +253,75 @@ function getServiceInfo(pageData, interData) {
     resData: interData.res,
     resDataData: JSON.stringify(hjsonStrToObj(interData.res).data),
     method: interData.method,
-    label: interData.label,
+    label: interData.label
   };
 
-  return service;
+  return service
 }
 
-function renderExtraField(extraFieldData, render) {
-  return extraFieldName => {
-    let template = ``;
-    let extraField = null;
-    let realExtraFieldData = extraFieldData;
-    if (extraFieldName) {
-      extraField = extraFieldData.find(item => item.name == extraFieldName);
-      realExtraFieldData = [extraField];
-    }
-
-    realExtraFieldData.forEach(item => {
-      let valueStartSymbol = '{';
-      let valueEndSymbol = '}';
-      let value = '';
-      if (item.value_type == 'string') {
-        valueStartSymbol = '"';
-        valueEndSymbol = '"';
-      } else if (item.value_type == 'reactnode') {
-        valueStartSymbol = '{(';
-        valueEndSymbol = ')}';
-      }
-
-      if (typeof item.value === 'undefined') {
-        value = item.default_value;
-      } else {
-        value = item.value;
-      }
-
-      template +=
-        ' ' + item.name + '=' + valueStartSymbol + value + valueEndSymbol;
-    });
-
-    return render({ template });
-  };
-}
-
-function renderCommonTempate(tmpl, data) {
+function renderCommonTempate (tmpl, data) {
   let template = nunjucks.renderString(tmpl, data);
-  return template;
+  return template
 }
 
-function getComponentByName(name, componentList) {
+function getComponentByName (name, componentList) {
   let component = componentList.find(item => item.name == name);
   if (component) {
-    return _.clone(component);
+    return _.cloneDeep(component)
   }
 
   console.error('没有此组件：', name);
-  return {};
+  return {}
 }
 
-async function buildPreviewFile(filePath, template) {
+async function buildPreviewFile (filePath, template) {
   let dir = path.dirname(filePath);
   return new Promise((resolve, reject) => {
-    mkdirp(dir, function(err) {
+    mkdirp(dir, function (err) {
       if (err) console.error(err);
 
       resolve();
       fs.writeFileSync(filePath, template);
     });
-  });
+  })
 }
 
-async function buildTemplateFile(filePath, template) {
+async function buildTemplateFile (filePath, template) {
   let dir = path.dirname(filePath);
   return new Promise((resolve, reject) => {
-    mkdirp(dir, function(err) {
+    mkdirp(dir, function (err) {
       if (err) console.error(err);
 
       fs.writeFileSync(filePath, template);
       resolve();
     });
-  });
+  })
 }
 
-function prettierTemplate(template) {
+function prettierTemplate (template) {
   let prettierTemplate = '';
   try {
     prettierTemplate = prettier.format(template, {
       semi: true,
-      jsxBracketSameLine: true,
+      jsxBracketSameLine: true
     });
   } catch (e) {
     prettierTemplate = template;
     console.error(e);
   }
-  return prettierTemplate;
+  return prettierTemplate
 }
 
-function arrToMap(arr, key) {
+function arrToMap (arr, key) {
   var map = {};
   key = key || 'id';
   arr.forEach(item => {
     map[item[key]] = item;
   });
-  return map;
+  return map
 }
 
-async function dirTree(dir, cwd, cb) {
-  const options = {
-    cwd: cwd,
-    matchBase: true,
-    ignore: ['.', '**/node_modules/**/*.*'],
-  };
-
-  return new Promise((resolve, reject) => {
-    glob(dir, options, function(er, files) {
-      resolve(files);
-      if (cb) {
-        cb(files);
-      }
-    });
-  });
-}
-
-function getDirFiles(cwd, dir, cb, ignore) {
-  dir = dir || '';
-  let dirPath = path.join(cwd, dir);
-  return new Promise((resolve, reject) => {
-    fs.readdir(dirPath, function(err, files) {
-      if (!err) {
-        let filesArr = [];
-
-        files.forEach(item => {
-          let fileInfo = {};
-
-          fileInfo.name = item;
-          fileInfo.fullName = path.join(dir, item);
-          let realFilePath = path.join(dirPath, item);
-          fileInfo.realFilePath = realFilePath;
-          fileInfo.isFile = fs.statSync(realFilePath).isFile();
-
-          filesArr.push(fileInfo);
-          // console.log(fs.statSync(item))
-        });
-        // console.log(filesArr)
-        resolve(filesArr);
-        if (cb) {
-          cb(filesArr);
-        }
-      } else {
-        reject(err);
-      }
-    });
-  });
-}
-
-async function getFileContent(file, cb) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(file, 'utf8', function(er, content) {
-      resolve(content);
-      if (cb) {
-        cb(content);
-      }
-    });
-  });
-}
-
-function render(
+function render (
   data,
   parentData,
   parentsData,
@@ -474,10 +367,9 @@ function render(
             service
           );
         });
-        return outputTemplate;
+        return outputTemplate
       },
-      renderExtraField: renderExtraField(data.extra_field, item => {
-        console.log('TCL: item', item, data);
+      renderExtraField: renderExtraField(data, item => {
         const outputTemplate = render(
           item,
           data,
@@ -487,15 +379,15 @@ function render(
           interData,
           service
         );
-        return outputTemplate;
+        return outputTemplate
       }),
-      renderValid: function(validName) {
+      renderValid: function (validName) {
         let template = '';
         data.rules.forEach(item => {
           template += `{pattern: ${item.rule}, message: "${item.error_msg}"},`;
         });
-        return template;
-      },
+        return template
+      }
     });
   } else {
     data.children &&
@@ -515,7 +407,113 @@ function render(
   }
 
   // console.log(outputTemplate)
-  return outputTemplate;
+  return outputTemplate
+}
+
+function renderExtraField (data, render) {
+  return (extraFieldName, excludeExtraFiledName) => {
+    let template = ``;
+    let realExtraFieldData = data.extra_field;
+    if (extraFieldName) {
+      const extraField = data.extra_field.find(
+        item => item.name === extraFieldName
+      );
+      realExtraFieldData = [extraField];
+    }
+
+    if (excludeExtraFiledName) {
+      const extraField = data.extra_field.find(
+        item => item.name === excludeExtraFiledName
+      );
+
+      _.remove(data.extra_field, item => item.name === excludeExtraFiledName);
+      realExtraFieldData = data.extra_field;
+    }
+
+    realExtraFieldData.forEach(item => {
+      let valueStartSymbol = '{';
+      let valueEndSymbol = '}';
+      let value = '';
+      if (item.value_type == 'string') {
+        valueStartSymbol = '"';
+        valueEndSymbol = '"';
+      } else if (item.value_type == 'reactnode') {
+        valueStartSymbol = '{(';
+        valueEndSymbol = ')}';
+      }
+
+      if (typeof item.value === 'undefined') {
+        value = item.default_value;
+      } else {
+        value = item.value;
+      }
+
+      template +=
+        ' ' + item.name + '=' + valueStartSymbol + value + valueEndSymbol;
+    });
+
+    return render({ template })
+  }
+}
+
+async function dirTree (dir, cwd, cb) {
+  const options = {
+    cwd: cwd,
+    matchBase: true,
+    ignore: ['.', '**/node_modules/**/*.*']
+  };
+
+  return new Promise((resolve, reject) => {
+    glob(dir, options, function (er, files) {
+      resolve(files);
+      if (cb) {
+        cb(files);
+      }
+    });
+  })
+}
+
+function getDirFiles (cwd, dir, cb, ignore) {
+  dir = dir || '';
+  let dirPath = path.join(cwd, dir);
+  return new Promise((resolve, reject) => {
+    fs.readdir(dirPath, function (err, files) {
+      if (!err) {
+        let filesArr = [];
+
+        files.forEach(item => {
+          let fileInfo = {};
+
+          fileInfo.name = item;
+          fileInfo.fullName = path.join(dir, item);
+          let realFilePath = path.join(dirPath, item);
+          fileInfo.realFilePath = realFilePath;
+          fileInfo.isFile = fs.statSync(realFilePath).isFile();
+
+          filesArr.push(fileInfo);
+          // console.log(fs.statSync(item))
+        });
+        // console.log(filesArr)
+        resolve(filesArr);
+        if (cb) {
+          cb(filesArr);
+        }
+      } else {
+        reject(err);
+      }
+    });
+  })
+}
+
+async function getFileContent (file, cb) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(file, 'utf8', function (er, content) {
+      resolve(content);
+      if (cb) {
+        cb(content);
+      }
+    });
+  })
 }
 
 module.exports = {
@@ -523,5 +521,5 @@ module.exports = {
   outputConfigFile: outputConfigFile,
   getDirFiles: getDirFiles,
   dirTree: dirTree,
-  getFileContent: getFileContent,
+  getFileContent: getFileContent
 };
